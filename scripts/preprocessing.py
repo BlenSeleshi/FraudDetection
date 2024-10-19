@@ -1,10 +1,10 @@
 import pandas as pd
 import numpy as np
 
-def load_data():
-    fraud_data = pd.read_csv('Fraud_Data.csv')
-    ip_country_data = pd.read_csv('IpAddress_to_Country.csv')
-    credit_data = pd.read_csv('creditcard.csv')
+def load_data(file_path):
+    fraud_data = pd.read_csv(file_path)
+    ip_country_data = pd.read_csv(file_path)
+    credit_data = pd.read_csv(file_path)
     return fraud_data, ip_country_data, credit_data
 
 def handle_missing_values(df):
