@@ -5,8 +5,8 @@ from sklearn.preprocessing import StandardScaler
 def load_data(filepath1, filepath2, filepath3):
     fraud_data = pd.read_csv(filepath1)
     ip_country_data = pd.read_csv(filepath2)
-    credit_data = pd.read_csv(filepath3)
-    return fraud_data, ip_country_data, credit_data
+    #credit_data = pd.read_csv(filepath3)
+    return fraud_data, ip_country_data
 
 def handle_missing_values(df):
     df = df.dropna()
