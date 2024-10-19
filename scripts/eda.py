@@ -87,3 +87,32 @@ def plot_transaction_time_diff_by_class(df):
     plt.yscale('log')  # Log scale for better visibility
     plt.show()
 
+def plot_hour_class_relationship(df):
+    plt.figure(figsize=(12, 6))
+    
+    # Calculate average class value for each hour of the day
+    hour_class = df.groupby('hour_of_day')['class'].mean()
+    
+    # Plotting
+    sns.barplot(x=hour_class.index, y=hour_class.values, palette='viridis')
+    plt.title('Average Fraud Class by Hour of Day')
+    plt.xlabel('Hour of Day')
+    plt.ylabel('Average Class Value')
+    plt.xticks(rotation=0)
+    plt.grid(axis='y', linestyle='--')
+    plt.show()
+
+def plot_day_class_relationship(df):
+    plt.figure(figsize=(12, 6))
+    
+    # Calculate average class value for each day of the week
+    day_class = df.groupby('day_of_week')['class'].mean()
+    
+    # Plotting
+    sns.barplot(x=day_class.index, y=day_class.values, palette='viridis')
+    plt.title('Average Fraud Class by Day of the Week')
+    plt.xlabel('Day of the Week (0=Monday, 6=Sunday)')
+    plt.ylabel('Average Class Value')
+    plt.xticks(rotation=0)
+    plt.grid(axis='y', linestyle='--')
+    plt.show()
