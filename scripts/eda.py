@@ -1,20 +1,6 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-def fraud_rate_by_country(df):
-    fraud_rate = df.groupby('country')['class'].mean().sort_values(ascending=False)
-    plt.figure(figsize=(12,6))
-    fraud_rate.plot(kind='bar', color='red')
-    plt.title('Fraud Rate by Country')
-    plt.show()
-
-def transaction_count_by_country(df):
-    transaction_count = df['country'].value_counts().sort_values(ascending=False)
-    plt.figure(figsize=(12,6))
-    transaction_count.plot(kind='bar', color='green')
-    plt.title('Transaction Count by Country')
-    plt.show()
-
 def univariate_analysis(df, column):
     plt.figure(figsize=(10,6))
     sns.histplot(df[column], kde=True)
@@ -34,14 +20,24 @@ def plot_correlation_matrix(df):
     plt.title('Correlation Matrix')
     plt.show()
 
-def transaction_value_analysis(df):
-    plt.figure(figsize=(10,6))
-    sns.boxplot(x='class', y='purchase_value', data=df)
-    plt.title('Transaction Value Distribution by Fraud Status')
+def fraud_by_country_analysis(df):
+    # Analyze fraud frequency by country
+    fraud_per_country = df.groupby('country')['class'].mean().sort_values(ascending=False)
+    plt.figure(figsize=(12,6))
+    fraud_per_country.plot(kind='bar', color='salmon')
+    plt.title('Fraud Frequency by Country')
     plt.show()
 
-def time_of_day_analysis(df):
+def transaction_velocity_analysis(df):
+    # Analyze how transaction velocity relates to fraud
     plt.figure(figsize=(10,6))
-    sns.histplot(df['hour_of_day'], bins=24, hue='class', multiple='stack')
-    plt.title('Fraud Occurrences by Time of Day')
+    sns.histplot(data=df, x='transaction_velocity', hue='class', bins=50)
+    plt.title('Transaction Velocity and Fraud')
+    plt.show()
+
+def transaction_recency_analysis(df):
+    # Analyze recency (time between signup and transaction) in relation to fraud
+    plt.figure(figsize=(10,6))
+    sns.histplot(data=df, x='transaction_time_diff', hue='class', bins=50)
+    plt.title('Transaction Recency and Fraud')
     plt.show()

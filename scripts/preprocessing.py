@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from sklearn.preprocessing import StandardScaler
 
 def load_data(file_path):
     fraud_data = pd.read_csv(file_path)
@@ -8,59 +9,57 @@ def load_data(file_path):
     return fraud_data, ip_country_data, credit_data
 
 def handle_missing_values(df):
-    df = df.dropna()  # Modify as needed, e.g., imputation strategies
+    df = df.dropna()
     return df
 
 def clean_data(df):
+    # Remove duplicates and correct data types
     df = df.drop_duplicates()
     df['signup_time'] = pd.to_datetime(df['signup_time'])
     df['purchase_time'] = pd.to_datetime(df['purchase_time'])
     return df
 
 def convert_ip_to_int(df):
-    # Convert IPs to a comparable integer format by scaling and rounding
-    df['ip_address'] = df['ip_address'].astype(str).apply(lambda x: int(float(x.split('.')[0])))
+    # Handle IP addresses with decimal points (Fraud_Data.csv format)
+    df['ip_address'] = df['ip_address'].astype(float).apply(np.floor).astype(int)
     return df
 
 def merge_ip_country(fraud_data, ip_country_data):
-    # Standardize IP conversion in ip_country_data
+    # Convert IPs in the country dataset to int format
     ip_country_data['lower_bound_ip_address'] = ip_country_data['lower_bound_ip_address'].astype(int)
     ip_country_data['upper_bound_ip_address'] = ip_country_data['upper_bound_ip_address'].astype(int)
-    
-    # Merge based on IP ranges
-    fraud_data['country'] = fraud_data.apply(lambda row: match_ip_to_country(row['ip_address'], ip_country_data), axis=1)
+
+    # Merge by finding where IP falls within the bounds
+    fraud_data = fraud_data.merge(ip_country_data, how='left',
+                                  left_on='ip_address',
+                                  right_on='lower_bound_ip_address')
     return fraud_data
 
-def match_ip_to_country(ip, ip_data):
-    match = ip_data[(ip_data['lower_bound_ip_address'] <= ip) & (ip_data['upper_bound_ip_address'] >= ip)]
-    if len(match) > 0:
-        return match['country'].values[0]
-    return 'Unknown'
+def add_transaction_features(df):
+    # Time between signup and purchase (recency feature)
+    df['transaction_time_diff'] = (df['purchase_time'] - df['signup_time']).dt.total_seconds()
 
-def feature_engineering(df):
-    # Transaction recency from signup time
-    df['recency_from_signup'] = (df['purchase_time'] - df['signup_time']).dt.total_seconds()
-    
-    # Transaction frequency and velocity (transactions per user within 24 hours)
-    df['transaction_count'] = df.groupby('user_id')['purchase_time'].transform('count')
-    
-    # Velocity: Number of transactions in the last 24 hours for the user
-    df = df.sort_values(by=['user_id', 'purchase_time'])
-    df['transaction_velocity_24h'] = df.groupby('user_id')['purchase_time'].transform(
-        lambda x: x.diff().dt.total_seconds().fillna(0).rolling(24*60*60).count()
-    )
-    
-    # Time-based features
+    # Hour and Day of purchase
     df['hour_of_day'] = df['purchase_time'].dt.hour
     df['day_of_week'] = df['purchase_time'].dt.dayofweek
+    
     return df
 
-def normalize_scale(df, columns):
-    from sklearn.preprocessing import StandardScaler
+def add_velocity_features(df):
+    # Transaction velocity: Count transactions within the last X hours
+    df = df.sort_values(by='purchase_time')
+    df['transaction_velocity'] = df.groupby('user_id')['purchase_time'].diff().dt.total_seconds().fillna(0)
+    return df
+
+def scale_features(df, columns):
     scaler = StandardScaler()
     df[columns] = scaler.fit_transform(df[columns])
     return df
 
 def encode_categorical(df):
+    # One-hot encode categorical features
     df = pd.get_dummies(df, columns=['browser', 'source', 'sex'], drop_first=True)
     return df
+
+def save_merged_data(df, filename='merged_fraud_data.csv'):
+    df.to_csv(filename, index=False)
