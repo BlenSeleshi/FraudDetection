@@ -49,7 +49,7 @@ def merge_ip_country(fraud_data, ip_country_data):
 
 def add_transaction_features(df):
     # Time between signup and purchase (recency feature)
-    df['transaction_time_diff'] = (df['purchase_time'] - df['signup_time']).dt.total_seconds()
+    df['transaction_time_diff(hours)'] = (df['purchase_time'] - df['signup_time']).dt.total_seconds() / 3600
 
     # Hour and Day of purchase
     df['hour_of_day'] = df['purchase_time'].dt.hour
@@ -60,8 +60,23 @@ def add_transaction_features(df):
 def add_velocity_features(df):
     # Transaction velocity: Count transactions within the last X hours
     df = df.sort_values(by='purchase_time')
-    df['transaction_velocity'] = df.groupby('user_id')['purchase_time'].diff().dt.total_seconds().fillna(0)
+    df['transaction_velocity'] = df.groupby('ip_address')['purchase_time'].diff().dt.total_seconds().fillna(0)
     return df
+
+def check_duplicated_ips(df):
+    # Group by IP address to find duplicated IPs
+    duplicated_ips = df.groupby('ip_address').agg(
+        total_purchase_amount=('purchase_value', 'sum'),
+        purchase_count=('purchase_value', 'size'),
+        country=('country', 'first'),  # Assuming you've already merged the country info
+        fraud_class=('class', 'first')  # Assuming fraud class is consistent for same IPs
+    ).reset_index()
+    
+    # Filter for IPs that have more than 1 purchase (i.e., duplicated IPs)
+    duplicated_ips = duplicated_ips[duplicated_ips['purchase_count'] > 1]
+    
+    return duplicated_ips
+
 
 def scale_features(df, columns):
     scaler = StandardScaler()
