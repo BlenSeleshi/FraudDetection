@@ -2,10 +2,10 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler
 
-def load_data(file_path):
-    fraud_data = pd.read_csv(file_path)
-    ip_country_data = pd.read_csv(file_path)
-    credit_data = pd.read_csv(file_path)
+def load_data(filepath1, filepath2, filepath3):
+    fraud_data = pd.read_csv(filepath1)
+    ip_country_data = pd.read_csv(filepath2)
+    credit_data = pd.read_csv(filepath3)
     return fraud_data, ip_country_data, credit_data
 
 def handle_missing_values(df):
