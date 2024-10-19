@@ -25,14 +25,20 @@ def convert_ip_to_int(df):
     return df
 
 def merge_ip_country(fraud_data, ip_country_data):
-    # Convert IPs in the country dataset to int format
-    ip_country_data['lower_bound_ip_address'] = ip_country_data['lower_bound_ip_address'].astype(int)
-    ip_country_data['upper_bound_ip_address'] = ip_country_data['upper_bound_ip_address'].astype(int)
+    # Sort by lower bound of IP range to ensure correct merge_asof behavior
+    ip_country_data = ip_country_data.sort_values(by='lower_bound_ip_address')
 
-    # Merge by finding where IP falls within the bounds
-    fraud_data = fraud_data.merge(ip_country_data, how='left',
-                                  left_on='ip_address',
-                                  right_on='lower_bound_ip_address')
+    # Merge based on IP address falling within the range [lower_bound_ip_address, upper_bound_ip_address]
+    fraud_data = pd.merge_asof(fraud_data.sort_values('ip_address'), 
+                               ip_country_data[['lower_bound_ip_address', 'upper_bound_ip_address', 'country']],
+                               left_on='ip_address', 
+                               right_on='lower_bound_ip_address',
+                               direction='backward')
+
+    # Filter to retain only rows where ip_address falls within the valid range
+    fraud_data = fraud_data[(fraud_data['ip_address'] >= fraud_data['lower_bound_ip_address']) & 
+                            (fraud_data['ip_address'] <= fraud_data['upper_bound_ip_address'])]
+
     return fraud_data
 
 def add_transaction_features(df):
