@@ -90,29 +90,31 @@ def plot_transaction_time_diff_by_class(df):
 def plot_hour_class_relationship(df):
     plt.figure(figsize=(12, 6))
     
-    # Calculate average class value for each hour of the day
-    hour_class = df.groupby('hour_of_day')['class'].mean()
+    # Count of each class for each hour of the day
+    hour_class_count = df.groupby(['hour_of_day', 'class']).size().unstack(fill_value=0)
     
     # Plotting
-    sns.barplot(x=hour_class.index, y=hour_class.values, palette='viridis')
-    plt.title('Average Fraud Class by Hour of Day')
+    hour_class_count.plot(kind='bar', stacked=True, color=['lightblue', 'salmon'], edgecolor='black')
+    plt.title('Count of Fraud and Non-Fraud Transactions by Hour of Day')
     plt.xlabel('Hour of Day')
-    plt.ylabel('Average Class Value')
+    plt.ylabel('Count of Transactions')
     plt.xticks(rotation=0)
+    plt.legend(title='Class', labels=['Non-Fraud (0)', 'Fraud (1)'])
     plt.grid(axis='y', linestyle='--')
     plt.show()
 
 def plot_day_class_relationship(df):
     plt.figure(figsize=(12, 6))
     
-    # Calculate average class value for each day of the week
-    day_class = df.groupby('day_of_week')['class'].mean()
+    # Count of each class for each day of the week
+    day_class_count = df.groupby(['day_of_week', 'class']).size().unstack(fill_value=0)
     
     # Plotting
-    sns.barplot(x=day_class.index, y=day_class.values, palette='viridis')
-    plt.title('Average Fraud Class by Day of the Week')
+    day_class_count.plot(kind='bar', stacked=True, color=['lightblue', 'salmon'], edgecolor='black')
+    plt.title('Count of Fraud and Non-Fraud Transactions by Day of Week')
     plt.xlabel('Day of the Week (0=Monday, 6=Sunday)')
-    plt.ylabel('Average Class Value')
+    plt.ylabel('Count of Transactions')
     plt.xticks(rotation=0)
+    plt.legend(title='Class', labels=['Non-Fraud (0)', 'Fraud (1)'])
     plt.grid(axis='y', linestyle='--')
     plt.show()
