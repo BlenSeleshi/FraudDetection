@@ -14,30 +14,76 @@ def bivariate_analysis(df, column1, column2):
     plt.show()
 
 def plot_correlation_matrix(df):
-    plt.figure(figsize=(12,8))
-    corr = df.corr()
-    sns.heatmap(corr, annot=True, cmap='coolwarm', fmt='.2f')
-    plt.title('Correlation Matrix')
+    plt.figure(figsize=(12, 8))
+    
+    # Select only numerical columns
+    numerical_df = df.select_dtypes(include=['number'])
+    
+    # Calculate the correlation matrix
+    corr = numerical_df.corr()
+    
+    # Plot the heatmap
+    sns.heatmap(corr, annot=True, cmap='coolwarm', fmt='.2f', square=True, linewidths=0.5)
+    plt.title('Correlation Matrix of Numerical Features')
     plt.show()
-
-def fraud_by_country_analysis(df):
-    # Analyze fraud frequency by country
-    fraud_per_country = df.groupby('country')['class'].mean().sort_values(ascending=False)
-    plt.figure(figsize=(12,6))
-    fraud_per_country.plot(kind='bar', color='salmon')
-    plt.title('Fraud Frequency by Country')
+    
+def plot_top_fraud_countries(df):
+    # Filter for fraud transactions
+    fraud_data = df[df['class'] == 1]
+    
+    # Count occurrences of each country in fraud transactions
+    country_fraud_counts = fraud_data['country'].value_counts().head(10)
+    
+    # Create a bar plot
+    plt.figure(figsize=(10, 6))
+    sns.barplot(x=country_fraud_counts.values, y=country_fraud_counts.index, palette='viridis')
+    plt.title('Top 10 Countries with Fraud Transactions')
+    plt.xlabel('Number of Fraud Transactions')
+    plt.ylabel('Country')
     plt.show()
-
-def transaction_velocity_analysis(df):
-    # Analyze how transaction velocity relates to fraud
-    plt.figure(figsize=(10,6))
-    sns.histplot(data=df, x='transaction_velocity', hue='class', bins=50)
-    plt.title('Transaction Velocity and Fraud')
-    plt.show()
-
+    
 def transaction_recency_analysis(df):
     # Analyze recency (time between signup and transaction) in relation to fraud
     plt.figure(figsize=(10,6))
-    sns.histplot(data=df, x='transaction_time_diff', hue='class', bins=50)
+    sns.histplot(data=df, x='transaction_time_diff(hours)', hue='class', bins=50)
     plt.title('Transaction Recency and Fraud')
     plt.show()
+    
+def plot_class_distribution(df):
+    # Plot the distribution of fraud and non-fraud classes
+    plt.figure(figsize=(6, 4))
+    sns.countplot(x='class', data=df, palette='Set2')
+    plt.title('Distribution of Fraud vs. Non-Fraud Classes')
+    plt.xlabel('Class (0: Non-Fraud, 1: Fraud)')
+    plt.ylabel('Count')
+    plt.show()
+
+def plot_purchase_value_by_class(df):
+    # Boxplot to show the distribution of purchase values across fraud and non-fraud classes
+    plt.figure(figsize=(8, 6))
+    sns.boxplot(x='class', y='purchase_value', data=df, palette='Set1')
+    plt.title('Purchase Value by Fraud Class')
+    plt.xlabel('Class (0: Non-Fraud, 1: Fraud)')
+    plt.ylabel('Purchase Value')
+    plt.yscale('log')  # Log scale for better visibility
+    plt.show()
+
+def plot_age_distribution_by_class(df):
+    # Plot age distribution by fraud and non-fraud classes
+    plt.figure(figsize=(8, 6))
+    sns.histplot(data=df, x='age', hue='class', multiple='stack', palette='Set1', bins=30)
+    plt.title('Age Distribution by Fraud Class')
+    plt.xlabel('Age')
+    plt.ylabel('Count')
+    plt.show()
+
+def plot_transaction_time_diff_by_class(df):
+    # Boxplot to show transaction time differences across fraud and non-fraud classes
+    plt.figure(figsize=(8, 6))
+    sns.boxplot(x='class', y='transaction_time_diff(hours)', data=df, palette='Set3')
+    plt.title('Transaction Time Difference by Fraud Class')
+    plt.xlabel('Class (0: Non-Fraud, 1: Fraud)')
+    plt.ylabel('Time Difference (hours)')
+    plt.yscale('log')  # Log scale for better visibility
+    plt.show()
+
