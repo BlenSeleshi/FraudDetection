@@ -54,6 +54,7 @@ def add_transaction_features(df):
     # Hour and Day of purchase
     df['hour_of_day'] = df['purchase_time'].dt.hour
     df['day_of_week'] = df['purchase_time'].dt.dayofweek
+    df['month_of_year'] = df['purchase_time'].dt.month
     
     return df
 
