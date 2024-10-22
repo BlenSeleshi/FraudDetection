@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
 
 def load_data(filepath1, filepath2):
     fraud_data = pd.read_csv(filepath1)
@@ -91,3 +92,12 @@ def encode_categorical(df):
 
 def save_merged_data(df, filename='merged_fraud_data.csv'):
     df.to_csv(filename, index=False)
+
+
+def feature_target_split(df, target):
+    X = df.drop(columns=[target])
+    y = df[target]
+    return X, y
+
+def train_test_split_data(X, y, test_size=0.2, random_state=42):
+    return train_test_split(X, y, test_size=test_size, random_state=random_state)
