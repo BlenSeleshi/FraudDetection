@@ -3,9 +3,9 @@ from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.metrics import accuracy_score, precision_score, f1_score, roc_auc_score, confusion_matrix
 from sklearn.model_selection import GridSearchCV
-from tensorflow.python.keras.models import Sequential
-from tensorflow.python.keras.layers import LSTM, Dense, Dropout
-from tensorflow.python.keras.callbacks import EarlyStopping
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import LSTM, Dense, Dropout
+from tensorflow.keras.callbacks import EarlyStopping
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
 import seaborn as sns
@@ -63,8 +63,8 @@ def mlp_model(X_train, y_train, X_test, y_test):
 # LSTM Model with GPU Utilization and Early Stopping
 def lstm_model(X_train, y_train, X_test, y_test):
     # Reshaping for LSTM input (required format: [samples, time_steps, features])
-    X_train_reshaped = X_train.values.reshape((X_train.shape[0], 1, X_train.shape[1]))
-    X_test_reshaped = X_test.values.reshape((X_test.shape[0], 1, X_test.shape[1]))
+    X_train_reshaped = X_train.reshape((X_train.shape[0], 1, X_train.shape[1]))
+    X_test_reshaped = X_test.reshape((X_test.shape[0], 1, X_test.shape[1]))
 
     model = Sequential()
     model.add(LSTM(100, activation='relu', input_shape=(1, X_train.shape[1])))
@@ -84,6 +84,7 @@ def lstm_model(X_train, y_train, X_test, y_test):
 
     evaluate_model(y_test, y_pred, "LSTM")
     return model
+
 
 # Evaluation Metrics and Plotting Confusion Matrix
 def evaluate_model(y_test, y_pred, model_name):
