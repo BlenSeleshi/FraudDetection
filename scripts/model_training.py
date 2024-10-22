@@ -5,11 +5,18 @@ from sklearn.metrics import accuracy_score, precision_score, f1_score, roc_auc_s
 from sklearn.model_selection import GridSearchCV
 from tensorflow.python.keras.models import Sequential
 from tensorflow.python.keras.layers import LSTM, Dense, Dropout
+from tensorflow.python.keras.callbacks import EarlyStopping
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
 import seaborn as sns
-import mlflow
-import mlflow.sklearn
+import tensorflow as tf
+
+# Check for GPU availability
+device_name = tf.test.gpu_device_name()
+if device_name != '/device:GPU:0':
+    print('GPU device not found. Using CPU.')
+else:
+    print(f'Found GPU at: {device_name}')
 
 # Random Forest Model with Hyperparameter Tuning
 def random_forest_model(X_train, y_train, X_test, y_test):
@@ -33,7 +40,7 @@ def gradient_boosting_model(X_train, y_train, X_test, y_test):
     grid_search = GridSearchCV(gb, param_grid, scoring='accuracy', cv=5)
     grid_search.fit(X_train, y_train)
 
-    best_gb = grid_search.best_estimator()
+    best_gb = grid_search.best_estimator_
     y_pred = best_gb.predict(X_test)
 
     evaluate_model(y_test, y_pred, "Gradient Boosting")
@@ -53,23 +60,27 @@ def mlp_model(X_train, y_train, X_test, y_test):
     evaluate_model(y_test, y_pred, "MLP")
     return best_mlp
 
-# LSTM Model for time-series prediction
+# LSTM Model with GPU Utilization and Early Stopping
 def lstm_model(X_train, y_train, X_test, y_test):
-    # Reshaping for LSTM input
+    # Reshaping for LSTM input (required format: [samples, time_steps, features])
     X_train_reshaped = X_train.values.reshape((X_train.shape[0], 1, X_train.shape[1]))
     X_test_reshaped = X_test.values.reshape((X_test.shape[0], 1, X_test.shape[1]))
 
     model = Sequential()
     model.add(LSTM(100, activation='relu', input_shape=(1, X_train.shape[1])))
-    model.add(Dropout(0.2))
-    model.add(Dense(1, activation='sigmoid'))
+    model.add(Dropout(0.2))  # Dropout to prevent overfitting
+    model.add(Dense(1, activation='sigmoid'))  # Output layer for binary classification
     model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
 
-    model.fit(X_train_reshaped, y_train, epochs=10, batch_size=32, verbose=1)
-    
+    # Early stopping to prevent overfitting
+    early_stopping = EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True)
+
+    # Training the model
+    model.fit(X_train_reshaped, y_train, epochs=50, batch_size=32, validation_split=0.2, callbacks=[early_stopping])
+
     # Predictions
     y_pred_prob = model.predict(X_test_reshaped)
-    y_pred = (y_pred_prob > 0.5).astype("int32")
+    y_pred = (y_pred_prob > 0.5).astype("int32")  # Threshold to get binary class
 
     evaluate_model(y_test, y_pred, "LSTM")
     return model
@@ -95,11 +106,3 @@ def evaluate_model(y_test, y_pred, model_name):
     plt.xlabel('Predicted')
     plt.ylabel('Actual')
     plt.show()
-
-# Standard Scaling
-# def scale_features(X_train, X_test):
-#     scaler = StandardScaler()
-#     X_train_scaled = scaler.fit_transform(X_train)
-#     X_test_scaled = scaler.transform(X_test)
-#     return X_train_scaled, X_test_scaled
-
