@@ -21,7 +21,7 @@ else:
 # Random Forest Model with Hyperparameter Tuning
 def random_forest_model(X_train, y_train, X_test, y_test):
     rf = RandomForestClassifier()
-    param_grid = {'n_estimators': [100, 200], 'max_depth': [10, 20], 'min_samples_split': [2, 5]}
+    param_grid = {'n_estimators': [50, 100], 'max_depth': [10, 20], 'min_samples_split': [2, 5]}
     
     grid_search = GridSearchCV(rf, param_grid, scoring='accuracy', cv=5)
     grid_search.fit(X_train, y_train)
@@ -35,7 +35,7 @@ def random_forest_model(X_train, y_train, X_test, y_test):
 # Gradient Boosting Model with Hyperparameter Tuning
 def gradient_boosting_model(X_train, y_train, X_test, y_test):
     gb = GradientBoostingClassifier()
-    param_grid = {'n_estimators': [100, 200], 'learning_rate': [0.1, 0.01], 'max_depth': [3, 5]}
+    param_grid = {'n_estimators': [50, 100], 'learning_rate': [0.1, 0.01], 'max_depth': [3, 5]}
     
     grid_search = GridSearchCV(gb, param_grid, scoring='accuracy', cv=5)
     grid_search.fit(X_train, y_train)
@@ -49,7 +49,7 @@ def gradient_boosting_model(X_train, y_train, X_test, y_test):
 # Multi-Layer Perceptron (MLP) Model with Hyperparameter Tuning
 def mlp_model(X_train, y_train, X_test, y_test):
     mlp = MLPClassifier()
-    param_grid = {'hidden_layer_sizes': [(100,), (150,)], 'activation': ['relu', 'tanh'], 'solver': ['adam']}
+    param_grid = {'hidden_layer_sizes': [(50,), (100,)], 'activation': ['relu', 'tanh'], 'solver': ['adam']}
     
     grid_search = GridSearchCV(mlp, param_grid, scoring='accuracy', cv=5)
     grid_search.fit(X_train, y_train)
