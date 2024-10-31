@@ -1,5 +1,5 @@
 from flask import jsonify, request
-from .predictions import make_prediction
+from predictions import make_prediction
 
 def setup_endpoints(app, data):
 
