@@ -1,4 +1,7 @@
-from scripts.model_loader import load_model
+import sys, os
+sys.path.append(os.path.abspath('../scripts'))
+
+from model_loader import load_model
 import pandas as pd
 
 model = load_model()

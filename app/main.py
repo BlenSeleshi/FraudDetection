@@ -1,8 +1,10 @@
 # fraud_detection_dashboard/app/main.py
+import sys, os
+sys.path.append(os.path.abspath('../dashboard'))
 from flask import Flask
-from .data_loader import load_data
-from .endpoints import setup_endpoints
-from .logging_config import setup_logging
+from data_loader import load_data
+from endpoints import setup_endpoints
+from logging_config import setup_logging
 from dashboard import create_dashboard
 
 # Initialize Flask app
@@ -12,7 +14,7 @@ app = Flask(__name__)
 setup_logging(app)
 
 # Load data and assign it to a global variable
-data = load_data('data/fraud_data.csv')
+data = load_data(r'C:\Users\Blen\OneDrive\Documents\10Academy\Week8&9\Data\Fraud_data.csv')
 
 # Register Flask API endpoints with data
 setup_endpoints(app, data)
